@@ -1,9 +1,7 @@
 package main
 
 import (
-	"TODOproject/handler"
-	"TODOproject/repository"
-	"TODOproject/service"
+	"TODOproject/todo"
 	"context"
 	"log"
 
@@ -23,9 +21,9 @@ func main() {
 	defer client.Disconnect(context.Background())
 
 	// Repository, Service ve Handler'ları oluşturma
-	todoRepo := repository.NewTodoRepository(client, "mydatabase", "todos")
-	todoService := service.NewTodoService(todoRepo)
-	todoHandler := handler.NewTodoHandler(todoService)
+	todoRepo := todo.NewTodoRepository(client, "mydatabase", "todos")
+	todoService := todo.NewTodoService(todoRepo)
+	todoHandler := todo.NewTodoHandler(todoService)
 
 	// Fiber oluşturma
 	app := fiber.New()
@@ -34,10 +32,7 @@ func main() {
 	app.Use(logger.New())
 
 	// Router'lar
-	app.Get("/todos", todoHandler.GetAllTodos)
-	app.Post("/todos", todoHandler.CreateTodo)
-	app.Put("/todos/:id", todoHandler.UpdateTodoCompletion)
-	app.Delete("/todos/:id", todoHandler.DeleteTodo)
+	todoHandler.RegisterRoutes(app)
 
 	// Uygulama portu
 	log.Fatal(app.Listen(":8080"))

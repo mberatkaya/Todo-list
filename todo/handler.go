@@ -1,16 +1,15 @@
-package handler
+package todo
 
 import (
-	"TODOproject/service"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TodoHandler struct {
-	Service *service.TodoService
+	Service *TodoService
 }
 
-func NewTodoHandler(service *service.TodoService) *TodoHandler {
+func NewTodoHandler(service *TodoService) *TodoHandler {
 	return &TodoHandler{Service: service}
 }
 
@@ -73,4 +72,12 @@ func (h *TodoHandler) DeleteTodo(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
+}
+
+func (h *TodoHandler) RegisterRoutes(app *fiber.App) {
+	appGroup := app.Group("/todo")
+	appGroup.Get("/todos", h.GetAllTodos)
+	appGroup.Post("/todos", h.CreateTodo)
+	appGroup.Put("/todos/:id", h.UpdateTodoCompletion)
+	appGroup.Delete("/todos/:id", h.DeleteTodo)
 }

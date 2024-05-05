@@ -1,7 +1,6 @@
-package repository
+package todo
 
 import (
-	model "TODOproject/models"
 	"context"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -18,14 +17,14 @@ func NewTodoRepository(client *mongo.Client, dbName, collectionName string) *Tod
 	return &TodoRepository{Collection: collection}
 }
 
-func (r *TodoRepository) GetAllTodos(ctx context.Context) ([]model.Todo, error) {
+func (r *TodoRepository) GetAllTodos(ctx context.Context) ([]Todo, error) {
 	cursor, err := r.Collection.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
-	var todos []model.Todo
+	var todos []Todo
 	if err := cursor.All(ctx, &todos); err != nil {
 		return nil, err
 	}
@@ -33,7 +32,7 @@ func (r *TodoRepository) GetAllTodos(ctx context.Context) ([]model.Todo, error) 
 	return todos, nil
 }
 
-func (r *TodoRepository) CreateTodo(ctx context.Context, todo *model.Todo) (*model.Todo, error) {
+func (r *TodoRepository) CreateTodo(ctx context.Context, todo *Todo) (*Todo, error) {
 	result, err := r.Collection.InsertOne(ctx, todo)
 	if err != nil {
 		return nil, err

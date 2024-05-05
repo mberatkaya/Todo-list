@@ -1,27 +1,25 @@
-package service
+package todo
 
 import (
-	model "TODOproject/models"
-	"TODOproject/repository"
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TodoService struct {
-	Repo *repository.TodoRepository
+	Repo *TodoRepository
 }
 
-func NewTodoService(repo *repository.TodoRepository) *TodoService {
+func NewTodoService(repo *TodoRepository) *TodoService {
 	return &TodoService{Repo: repo}
 }
 
-func (s *TodoService) GetAllTodos(ctx context.Context) ([]model.Todo, error) {
+func (s *TodoService) GetAllTodos(ctx context.Context) ([]Todo, error) {
 	return s.Repo.GetAllTodos(ctx)
 }
 
-func (s *TodoService) CreateTodo(ctx context.Context, task string) (*model.Todo, error) {
-	todo := &model.Todo{
+func (s *TodoService) CreateTodo(ctx context.Context, task string) (*Todo, error) {
+	todo := &Todo{
 		Task:      task,
 		Completed: false,
 	}
