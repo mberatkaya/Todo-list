@@ -1,9 +1,6 @@
 package main
 
 import (
-	"TODOproject/todo"
-
-	"TODOproject/config"
 	"context"
 	"log"
 
@@ -11,6 +8,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"TODOproject/config"
+	"TODOproject/todo"
 )
 
 func main() {
