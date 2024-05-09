@@ -2,6 +2,8 @@ package main
 
 import (
 	"TODOproject/todo"
+
+	"TODOproject/config"
 	"context"
 	"log"
 
@@ -12,28 +14,31 @@ import (
 )
 
 func main() {
-	// MongoDB bağlamtısı
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	// Yapılandırmayı al
+	cfg := config.New()
+
+	// MongoDB bağlantı ayarları
+	clientOptions := options.Client().ApplyURI(cfg.MongoDB.ConnectionURL)
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("MongoDB bağlantı hatası: %v", err)
 	}
 	defer client.Disconnect(context.Background())
 
-	// Repository, Service ve Handler'ları oluşturma
+	// Todo Repository, Service ve Handler'larını oluştur
 	todoRepo := todo.NewTodoRepository(client, "mydatabase", "todos")
 	todoService := todo.NewTodoService(todoRepo)
 	todoHandler := todo.NewTodoHandler(todoService)
 
-	// Fiber oluşturma
+	// Fiber uygulamasını oluştur
 	app := fiber.New()
 
 	// Middleware'ler
 	app.Use(logger.New())
 
-	// Router'lar
+	// Router'ları kaydet
 	todoHandler.RegisterRoutes(app)
 
-	// Uygulama portu
-	log.Fatal(app.Listen(":8080"))
+	// Uygulamayı belirtilen port üzerinden dinle
+	log.Fatal(app.Listen(":" + cfg.Server.Port))
 }
