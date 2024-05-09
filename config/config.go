@@ -32,9 +32,13 @@ func New() Config {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	cfg.Server.Port = os.Getenv("SERVER_PORT")
+	cfg.Server = ServerConfig{
+		Port: os.Getenv("PORT"),
+	}
 
-	cfg.MongoDB.ConnectionURL = os.Getenv("MONGO_CONNECTION_URL")
+	cfg.MongoDB = MongoDBConfig{
+		ConnectionURL: os.Getenv("MONGO_CONNECTION_URL"),
+	}
 
 	return cfg
 }
