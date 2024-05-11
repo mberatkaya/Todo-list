@@ -13,10 +13,22 @@ func NewTodoHandler(service *TodoService) *TodoHandler {
 	return &TodoHandler{Service: service}
 }
 
+func (h *TodoHandler) RegisterRoutes(app *fiber.App) {
+	appGroup := app.Group("/api/todo") // API rotası için grup oluştur
+
+	appGroup.Get("/", h.GetAllTodos)
+
+	appGroup.Post("/", h.CreateTodo)
+
+	appGroup.Put("/:id", h.UpdateTodoCompletion)
+
+	appGroup.Delete("/:id", h.DeleteTodo)
+}
+
 func (h *TodoHandler) GetAllTodos(c *fiber.Ctx) error {
 	todos, err := h.Service.GetAllTodos(c.Context())
 	if err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(todos)
 }
@@ -32,7 +44,7 @@ func (h *TodoHandler) CreateTodo(c *fiber.Ctx) error {
 
 	todo, err := h.Service.CreateTodo(c.Context(), createTodoDto.Task)
 	if err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(todo)
@@ -54,7 +66,7 @@ func (h *TodoHandler) UpdateTodoCompletion(c *fiber.Ctx) error {
 	}
 
 	if err := h.Service.UpdateTodoCompletion(c.Context(), objectID, updatedTodo.Completed); err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -68,16 +80,8 @@ func (h *TodoHandler) DeleteTodo(c *fiber.Ctx) error {
 	}
 
 	if err := h.Service.DeleteTodo(c.Context(), objectID); err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
-}
-
-func (h *TodoHandler) RegisterRoutes(app *fiber.App) {
-	appGroup := app.Group("/todo")
-	appGroup.Get("/todos", h.GetAllTodos)
-	appGroup.Post("/todos", h.CreateTodo)
-	appGroup.Put("/todos/:id", h.UpdateTodoCompletion)
-	appGroup.Delete("/todos/:id", h.DeleteTodo)
 }
