@@ -2,9 +2,10 @@ package user
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/bson"
-
+	"errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -18,6 +19,14 @@ func NewUserRepository(client *mongo.Client, dbName, collectionName string) *Use
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *User) (*User, error) {
+	// Check if nickname already exists
+	existingUser := &User{}
+	err := r.Collection.FindOne(ctx, bson.D{{"nickname", user.Nickname}}).Decode(existingUser)
+	if err == nil {
+		return nil, errors.New("nickname already exists")
+	}
+
+	// Insert the user with password
 	result, err := r.Collection.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
@@ -33,6 +42,23 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id primitive.ObjectID)
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *UserRepository) GetUserByNickname(ctx context.Context, nickname string) (*User, error) {
+	var user User
+	err := r.Collection.FindOne(ctx, bson.D{{"nickname", nickname}}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) UpdateUser(ctx context.Context, id primitive.ObjectID, updateFields bson.D) error {
+	filter := bson.D{{"_id", id}}
+	update := bson.D{{"$set", updateFields}}
+
+	_, err := r.Collection.UpdateOne(ctx, filter, update)
+	return err
 }
 
 func (r *UserRepository) DeleteUser(ctx context.Context, id primitive.ObjectID) error {
