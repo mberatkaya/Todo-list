@@ -12,9 +12,10 @@ type TodoRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewTodoRepository(client *mongo.Client, dbName, collectionName string) *TodoRepository {
-	collection := client.Database(dbName).Collection(collectionName)
-	return &TodoRepository{Collection: collection}
+func NewTodoRepository(client *mongo.Client) *TodoRepository {
+	db := client.Database("mydatabase")
+	collection := db.Collection("todos")
+	return &TodoRepository{collection}
 }
 
 func (r *TodoRepository) GetAllTodos(ctx context.Context) ([]Todo, error) {

@@ -27,12 +27,12 @@ func main() {
 	defer client.Disconnect(context.Background())
 
 	// Todo Repository, Service ve Handler'larını oluştur
-	todoRepo := todo.NewTodoRepository(client, "mydatabase", "todos")
+	todoRepo := todo.NewTodoRepository(client)
 	todoService := todo.NewTodoService(todoRepo)
 	todoHandler := todo.NewTodoHandler(todoService)
 
 	// User Repository, Service ve Handler'larını oluştur
-	userRepo := user.NewUserRepository(client, "mydatabase", "users")
+	userRepo := user.NewUserRepository(client)
 	userService := user.NewUserService(userRepo)
 	userHandler := user.NewUserHandler(userService)
 

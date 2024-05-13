@@ -13,20 +13,19 @@ type UserRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewUserRepository(client *mongo.Client, dbName, collectionName string) *UserRepository {
-	collection := client.Database(dbName).Collection(collectionName)
-	return &UserRepository{Collection: collection}
+func NewUserRepository(client *mongo.Client) *UserRepository {
+	db := client.Database("mydatabase")
+	collection := db.Collection("users")
+	return &UserRepository{collection}
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *User) (*User, error) {
-	// Check if nickname already exists
 	existingUser := &User{}
 	err := r.Collection.FindOne(ctx, bson.D{{"nickname", user.Nickname}}).Decode(existingUser)
 	if err == nil {
 		return nil, errors.New("nickname already exists")
 	}
 
-	// Insert the user with password
 	result, err := r.Collection.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
