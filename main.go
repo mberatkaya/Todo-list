@@ -11,10 +11,11 @@ import (
 
 	"TODOproject/config"
 	"TODOproject/todo"
+	"TODOproject/user"
 )
 
 func main() {
-	// Yapılandırmayı al
+
 	cfg := config.New()
 
 	// MongoDB bağlantı ayarları
@@ -30,14 +31,20 @@ func main() {
 	todoService := todo.NewTodoService(todoRepo)
 	todoHandler := todo.NewTodoHandler(todoService)
 
-	// Fiber uygulamasını oluştur
+	// User Repository, Service ve Handler'larını oluştur
+	userRepo := user.NewUserRepository(client, "mydatabase", "users")
+	userService := user.NewUserService(userRepo)
+	userHandler := user.NewUserHandler(userService)
+
+	// Fiber
 	app := fiber.New()
 
 	// Middleware'ler
 	app.Use(logger.New())
 
-	// Router'ları kaydet
+	// Routerlar
 	todoHandler.RegisterRoutes(app)
+	userHandler.RegisterRoutes(app)
 
 	// Uygulamayı belirtilen port üzerinden dinle
 	log.Fatal(app.Listen(":" + cfg.Server.Port))
