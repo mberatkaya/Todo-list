@@ -87,13 +87,9 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	}
 
 	if err := h.Service.UpdateUser(c.Context(), objectID, updateFields); err != nil {
-		if mongoErr, ok := err.(mongo.WriteException); ok {
-			for _, writeErr := range mongoErr.WriteErrors {
-				if writeErr.Code == 11000 {
-					// Duplicate key error (nickname already exists)
-					return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Nickname already exists"})
-				}
-			}
+		err := h.Service.UpdateUser(c.Context(), objectID, updateFields)
+		if err != nil {
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Nickname already exists"})
 		}
 
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
