@@ -32,11 +32,7 @@ func (s *UserService) GetUserByNickname(ctx context.Context, nickname string) (*
 	return s.Repo.GetUserByNickname(ctx, nickname)
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, id primitive.ObjectID, nickname, fullName string) error {
-	updateFields := bson.D{
-		{"nickname", nickname},
-		{"fullName", fullName},
-	}
+func (s *UserService) UpdateUser(ctx context.Context, id primitive.ObjectID, updateFields bson.D) error {
 	return s.Repo.UpdateUser(ctx, id, updateFields)
 }
 

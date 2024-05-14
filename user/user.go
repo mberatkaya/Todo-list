@@ -4,13 +4,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type User struct {
 	ID       primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Nickname string             `json:"nickname"`
+	Nickname string             `bson:"nickname" unique:"true"`
 	FullName string             `json:"fullName"`
 	Password string             `json:"password"`
-}
-
-type CreateUserRequest struct {
-	Nickname string `json:"nickname"`
-	FullName string `json:"fullName"`
-	Password string `json:"password"`
 }

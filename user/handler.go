@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -25,7 +26,7 @@ func (h *UserHandler) RegisterRoutes(app *fiber.App) {
 }
 
 func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
-	var req CreateUserRequest
+	var req CreateUserDto
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 	}
@@ -35,7 +36,6 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Nickname already exists"})
 	}
 
-	// Create user with password
 	user, err := h.Service.CreateUser(c.Context(), req.Nickname, req.FullName, req.Password)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error})
@@ -69,12 +69,33 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	var req CreateUserRequest
+	var req UpdateUserDto
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 	}
 
-	if err := h.Service.UpdateUser(c.Context(), objectID, req.Nickname, req.FullName); err != nil {
+	// Update fields
+	updateFields := bson.D{}
+	if req.Nickname != nil {
+		updateFields = append(updateFields, bson.E{"nickname", *req.Nickname})
+	}
+	if req.FullName != nil {
+		updateFields = append(updateFields, bson.E{"fullName", *req.FullName})
+	}
+	if req.Password != nil {
+		updateFields = append(updateFields, bson.E{"password", *req.Password})
+	}
+
+	if err := h.Service.UpdateUser(c.Context(), objectID, updateFields); err != nil {
+		if mongoErr, ok := err.(mongo.WriteException); ok {
+			for _, writeErr := range mongoErr.WriteErrors {
+				if writeErr.Code == 11000 {
+					// Duplicate key error (nickname already exists)
+					return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Nickname already exists"})
+				}
+			}
+		}
+
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
