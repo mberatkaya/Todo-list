@@ -31,7 +31,7 @@ func (h *TodoHandler) GetAllTodos(c *fiber.Ctx) error {
 }
 
 func (h *TodoHandler) CreateTodo(c *fiber.Ctx) error {
-	var req CreateTodoRequest
+	var req CreateTodoDto
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 	}
@@ -51,7 +51,7 @@ func (h *TodoHandler) UpdateTodoCompletion(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	var req UpdateTodoRequest
+	var req UpdateTodoDto
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 	}
