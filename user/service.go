@@ -18,6 +18,13 @@ func NewUserService(repo *UserRepository) *UserService {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, nickname, fullName, password string) (*User, error) {
+	// Takma adın zaten mevcut olup olmadığını kontrol et
+	_, err := s.Repo.GetUserByNickname(ctx, nickname)
+	if err == nil {
+		return nil, errors.New("nickname already exists")
+	}
+
+	// Şifreyi hashle
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
