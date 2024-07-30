@@ -2,10 +2,12 @@ package user
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserHandler struct {
@@ -20,9 +22,10 @@ func (h *UserHandler) RegisterRoutes(app *fiber.App) {
 	appGroup := app.Group("/api/user")
 
 	appGroup.Post("/", h.CreateUser)
-	appGroup.Get("/:id", h.GetUser)
+	appGroup.Get("/:id", h.GetUserByID)
 	appGroup.Put("/:id", h.UpdateUser)
 	appGroup.Delete("/:id", h.DeleteUser)
+	appGroup.Post("/login", h.Login) // New login route
 }
 
 func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
@@ -31,20 +34,15 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 	}
 
-	_, err := h.Service.GetUserByNickname(c.Context(), req.Nickname)
-	if err == nil {
-		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Nickname already exists"})
-	}
-
 	user, err := h.Service.CreateUser(c.Context(), req.Nickname, req.FullName, req.Password)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(user)
 }
 
-func (h *UserHandler) GetUser(c *fiber.Ctx) error {
+func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
@@ -83,15 +81,17 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		updateFields = append(updateFields, bson.E{"fullName", *req.FullName})
 	}
 	if req.Password != nil {
-		updateFields = append(updateFields, bson.E{"password", *req.Password})
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to hash password"})
+		}
+		updateFields = append(updateFields, bson.E{"password", string(hashedPassword)})
 	}
 
 	if err := h.Service.UpdateUser(c.Context(), objectID, updateFields); err != nil {
-		err := h.Service.UpdateUser(c.Context(), objectID, updateFields)
-		if err != nil {
+		if err.Error() == "nickname already exists" {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Nickname already exists"})
 		}
-
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -110,4 +110,22 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
+}
+
+func (h *UserHandler) Login(c *fiber.Ctx) error {
+	var req struct {
+		Nickname string `json:"nickname"`
+		Password string `json:"password"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+	}
+
+	user, err := h.Service.ValidatePassword(c.Context(), req.Nickname, req.Password)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(user)
 }
