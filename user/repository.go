@@ -2,10 +2,8 @@ package user
 
 import (
 	"context"
-	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -20,12 +18,6 @@ func NewUserRepository(client *mongo.Client) *UserRepository {
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *User) (*User, error) {
-	existingUser := &User{}
-	err := r.Collection.FindOne(ctx, bson.D{{"nickname", user.Nickname}}).Decode(existingUser)
-	if err == nil {
-		return nil, errors.New("nickname already exists")
-	}
-
 	result, err := r.Collection.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
