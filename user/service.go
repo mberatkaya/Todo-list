@@ -18,13 +18,11 @@ func NewUserService(repo *UserRepository) *UserService {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, nickname, fullName, password string) (*User, error) {
-	// Takma adın zaten mevcut olup olmadığını kontrol et
 	_, err := s.Repo.GetUserByNickname(ctx, nickname)
 	if err == nil {
 		return nil, errors.New("nickname already exists")
 	}
 
-	// Şifreyi hashle
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -48,6 +46,23 @@ func (s *UserService) GetUserByNickname(ctx context.Context, nickname string) (*
 }
 
 func (s *UserService) UpdateUser(ctx context.Context, id primitive.ObjectID, updateFields bson.D) error {
+	existingUser, err := s.Repo.GetUserByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	for _, field := range updateFields {
+		if field.Key == "nickname" {
+			// Eğer takma ad farklı ise
+			if existingUser.Nickname != field.Value {
+				_, err := s.Repo.GetUserByNickname(ctx, field.Value.(string))
+				if err == nil {
+					return errors.New("nickname already exists")
+				}
+			}
+		}
+	}
+
 	return s.Repo.UpdateUser(ctx, id, updateFields)
 }
 
