@@ -27,7 +27,11 @@ func (h *TodoHandler) GetAllTodos(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	return c.JSON(todos)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  "success",
+		"message": "Todos retrieved successfully",
+		"data":    todos,
+	})
 }
 
 func (h *TodoHandler) CreateTodo(c *fiber.Ctx) error {
@@ -41,7 +45,11 @@ func (h *TodoHandler) CreateTodo(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(todo)
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"status":  "success",
+		"message": "Todo created successfully",
+		"data":    todo,
+	})
 }
 
 func (h *TodoHandler) UpdateTodoCompletion(c *fiber.Ctx) error {
@@ -60,7 +68,10 @@ func (h *TodoHandler) UpdateTodoCompletion(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.SendStatus(fiber.StatusOK)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  "success",
+		"message": "Todo updated successfully",
+	})
 }
 
 func (h *TodoHandler) DeleteTodo(c *fiber.Ctx) error {
@@ -74,5 +85,8 @@ func (h *TodoHandler) DeleteTodo(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.SendStatus(fiber.StatusNoContent)
+	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{
+		"status":  "success",
+		"message": "Todo deleted successfully",
+	})
 }
