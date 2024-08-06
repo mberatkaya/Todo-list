@@ -39,7 +39,11 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(user)
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"status":  "success",
+		"message": "User created successfully",
+		"data":    user,
+	})
 }
 
 func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
@@ -57,7 +61,11 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(user)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  "success",
+		"message": "User retrieved successfully",
+		"data":    user,
+	})
 }
 
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
@@ -95,7 +103,10 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.SendStatus(fiber.StatusOK)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  "success",
+		"message": "User updated successfully",
+	})
 }
 
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
@@ -109,7 +120,10 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.SendStatus(fiber.StatusNoContent)
+	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{
+		"status":  "success",
+		"message": "User deleted successfully",
+	})
 }
 
 func (h *UserHandler) Login(c *fiber.Ctx) error {
@@ -127,5 +141,9 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(user)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  "success",
+		"message": "User logged in successfully",
+		"data":    user,
+	})
 }
