@@ -23,22 +23,17 @@ type MongoDBConfig struct {
 	ConnectionURL string
 }
 
-const envPath = ".env"
-
-func New() Config {
-	var cfg Config
-
-	if err := godotenv.Load(envPath); err != nil {
+func NewConfig() *Config {
+	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	cfg.Server = ServerConfig{
-		Port: os.Getenv("PORT"),
+	return &Config{
+		Server: ServerConfig{
+			Port: os.Getenv("PORT"),
+		},
+		MongoDB: MongoDBConfig{
+			ConnectionURL: os.Getenv("MONGO_CONNECTION_URL"),
+		},
 	}
-
-	cfg.MongoDB = MongoDBConfig{
-		ConnectionURL: os.Getenv("MONGO_CONNECTION_URL"),
-	}
-
-	return cfg
 }
