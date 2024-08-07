@@ -15,8 +15,7 @@ import (
 )
 
 func main() {
-
-	cfg := config.New()
+	cfg := config.NewConfig()
 
 	// MongoDB bağlantı ayarları
 	clientOptions := options.Client().ApplyURI(cfg.MongoDB.ConnectionURL)
@@ -26,26 +25,27 @@ func main() {
 	}
 	defer client.Disconnect(context.Background())
 
-	// Todo Repository, Service ve Handler'larını oluştur
-	todoRepo := todo.NewTodoRepository(client)
-	todoService := todo.NewTodoService(todoRepo)
-	todoHandler := todo.NewTodoHandler(todoService)
+	// Veritabanı ve koleksiyonlar
+	db := client.Database("mydatabase") // Database name direkt olarak connection URL'den alınabilir
+	todoCollection := db.Collection("todos")
+	userCollection := db.Collection("users")
 
-	// User Repository, Service ve Handler'larını oluştur
-	userRepo := user.NewUserRepository(client)
-	userService := user.NewUserService(userRepo)
-	userHandler := user.NewUserHandler(userService)
-
-	// Fiber
+	// Fiber uygulaması
 	app := fiber.New()
-
-	// Middleware'ler
 	app.Use(logger.New())
 
-	// Routerlar
+	// Todo servisi ve handler
+	todoRepo := todo.NewTodoRepository(todoCollection)
+	todoService := todo.NewTodoService(todoRepo)
+	todoHandler := todo.NewTodoHandler(todoService)
 	todoHandler.RegisterRoutes(app)
+
+	// User servisi ve handler
+	userRepo := user.NewUserRepository(userCollection)
+	userService := user.NewUserService(userRepo)
+	userHandler := user.NewUserHandler(userService)
 	userHandler.RegisterRoutes(app)
 
-	// Uygulamayı belirtilen port üzerinden dinle
+	// Sunucu başlatma
 	log.Fatal(app.Listen(":" + cfg.Server.Port))
 }
