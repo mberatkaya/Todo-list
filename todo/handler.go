@@ -1,6 +1,7 @@
 package todo
 
 import (
+	"TODOproject/utility"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -14,7 +15,7 @@ func NewTodoHandler(service *TodoService) *TodoHandler {
 }
 
 func (h *TodoHandler) RegisterRoutes(app *fiber.App) {
-	appGroup := app.Group("/api/todo") // API rotası için grup oluştur
+	appGroup := app.Group("/api/todo")
 
 	appGroup.Get("/", h.GetAllTodos)
 	appGroup.Post("/", h.CreateTodo)
@@ -25,68 +26,54 @@ func (h *TodoHandler) RegisterRoutes(app *fiber.App) {
 func (h *TodoHandler) GetAllTodos(c *fiber.Ctx) error {
 	todos, err := h.Service.GetAllTodos(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return utility.ErrorResponse(c, err)
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "Todos retrieved successfully",
-		"data":    todos,
-	})
+	return utility.OkResponse(c, todos)
 }
 
 func (h *TodoHandler) CreateTodo(c *fiber.Ctx) error {
 	var req CreateTodoDto
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "error": "Invalid request payload"})
 	}
 
 	todo, err := h.Service.CreateTodo(c.Context(), req.Task)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return utility.ErrorResponse(c, err)
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"status":  "success",
-		"message": "Todo created successfully",
-		"data":    todo,
-	})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"status": "success", "data": todo})
 }
 
 func (h *TodoHandler) UpdateTodoCompletion(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "error": "Invalid ID"})
 	}
 
 	var req UpdateTodoDto
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "error": "Invalid request payload"})
 	}
 
 	if err := h.Service.UpdateTodoCompletion(c.Context(), objectID, req.Completed); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return utility.ErrorResponse(c, err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "Todo updated successfully",
-	})
+	return utility.OkResponse(c, nil)
 }
 
 func (h *TodoHandler) DeleteTodo(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "error": "Invalid ID"})
 	}
 
 	if err := h.Service.DeleteTodo(c.Context(), objectID); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return utility.ErrorResponse(c, err)
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{
-		"status":  "success",
-		"message": "Todo deleted successfully",
-	})
+	return utility.OkResponse(c, nil)
 }
