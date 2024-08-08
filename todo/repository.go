@@ -11,7 +11,8 @@ type TodoRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewTodoRepository(collection *mongo.Collection) *TodoRepository {
+func NewTodoRepository(client *mongo.Client, dbName string) *TodoRepository {
+	collection := client.Database(dbName).Collection("todos")
 	return &TodoRepository{Collection: collection}
 }
 
