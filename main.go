@@ -25,27 +25,26 @@ func main() {
 	}
 	defer client.Disconnect(context.Background())
 
-	// Veritabanı ve koleksiyonlar
-	db := client.Database("mydatabase") // Database name direkt olarak connection URL'den alınabilir
-	todoCollection := db.Collection("todos")
-	userCollection := db.Collection("users")
+	// Todo Repository, Service ve Handler'larını oluştur
+	todoRepo := todo.NewTodoRepository(client, cfg.MongoDB.DatabaseName)
+	todoService := todo.NewTodoService(todoRepo)
+	todoHandler := todo.NewTodoHandler(todoService)
+
+	// User Repository, Service ve Handler'larını oluştur
+	userRepo := user.NewUserRepository(client, cfg.MongoDB.DatabaseName)
+	userService := user.NewUserService(userRepo)
+	userHandler := user.NewUserHandler(userService)
 
 	// Fiber uygulaması
 	app := fiber.New()
+
+	// Middleware'ler
 	app.Use(logger.New())
 
-	// Todo servisi ve handler
-	todoRepo := todo.NewTodoRepository(todoCollection)
-	todoService := todo.NewTodoService(todoRepo)
-	todoHandler := todo.NewTodoHandler(todoService)
+	// Routerlar
 	todoHandler.RegisterRoutes(app)
-
-	// User servisi ve handler
-	userRepo := user.NewUserRepository(userCollection)
-	userService := user.NewUserService(userRepo)
-	userHandler := user.NewUserHandler(userService)
 	userHandler.RegisterRoutes(app)
 
-	// Sunucu başlatma
+	// Uygulamayı belirtilen port üzerinden dinle
 	log.Fatal(app.Listen(":" + cfg.Server.Port))
 }
