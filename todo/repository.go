@@ -2,9 +2,8 @@ package todo
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -12,10 +11,9 @@ type TodoRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewTodoRepository(client *mongo.Client) *TodoRepository {
-	db := client.Database("mydatabase")
-	collection := db.Collection("todos")
-	return &TodoRepository{collection}
+func NewTodoRepository(client *mongo.Client, dbName string) *TodoRepository {
+	collection := client.Database(dbName).Collection("todos")
+	return &TodoRepository{Collection: collection}
 }
 
 func (r *TodoRepository) GetAllTodos(ctx context.Context) ([]Todo, error) {

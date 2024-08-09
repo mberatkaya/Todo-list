@@ -7,38 +7,36 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Uygulama yapılandırma bilgilerini tutar
+// Config struct'ı uygulamanın yapılandırma bilgilerini tutar
 type Config struct {
 	Server  ServerConfig
 	MongoDB MongoDBConfig
 }
 
-// HTTP sunucu yapılandırma bilgilerini tutar
+// ServerConfig struct'ı HTTP sunucu yapılandırma bilgilerini tutar
 type ServerConfig struct {
 	Port string
 }
 
-// MongoDB yapılandırma bilgilerini tutar
+// MongoDBConfig struct'ı MongoDB yapılandırma bilgilerini tutar
 type MongoDBConfig struct {
 	ConnectionURL string
+	DatabaseName  string
 }
 
-const envPath = ".env"
-
-func New() Config {
-	var cfg Config
-
-	if err := godotenv.Load(envPath); err != nil {
+// NewConfig fonksiyonu yapılandırma bilgisini döner
+func NewConfig() *Config {
+	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	cfg.Server = ServerConfig{
-		Port: os.Getenv("PORT"),
+	return &Config{
+		Server: ServerConfig{
+			Port: os.Getenv("PORT"),
+		},
+		MongoDB: MongoDBConfig{
+			ConnectionURL: os.Getenv("MONGO_CONNECTION_URL"),
+			DatabaseName:  os.Getenv("MONGO_DATABASE_NAME"),
+		},
 	}
-
-	cfg.MongoDB = MongoDBConfig{
-		ConnectionURL: os.Getenv("MONGO_CONNECTION_URL"),
-	}
-
-	return cfg
 }

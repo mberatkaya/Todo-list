@@ -11,10 +11,9 @@ type UserRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewUserRepository(client *mongo.Client) *UserRepository {
-	db := client.Database("mydatabase")
-	collection := db.Collection("users")
-	return &UserRepository{collection}
+func NewUserRepository(client *mongo.Client, dbName string) *UserRepository {
+	collection := client.Database(dbName).Collection("users")
+	return &UserRepository{Collection: collection}
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *User) (*User, error) {
