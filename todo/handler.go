@@ -26,81 +26,54 @@ func (h *TodoHandler) RegisterRoutes(app *fiber.App) {
 func (h *TodoHandler) GetAllTodos(c *fiber.Ctx) error {
 	todos, err := h.Service.GetAllTodos(c.Context())
 	if err != nil {
-		return utility.ErrorResponse(c, err)
+		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
 	}
-<<<<<<< HEAD
-	return utility.SuccessResponse(c, todos)
-=======
 	return utility.OkResponse(c, todos)
->>>>>>> e7302d5a5cff8e6414bb3f1cf9a648c7fa80799d
 }
 
 func (h *TodoHandler) CreateTodo(c *fiber.Ctx) error {
 	var req CreateTodoDto
 	if err := c.BodyParser(&req); err != nil {
-<<<<<<< HEAD
-		return utility.ErrorResponse(c, err)
-=======
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "error": "Invalid request payload"})
->>>>>>> e7302d5a5cff8e6414bb3f1cf9a648c7fa80799d
+		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
 	}
 
 	todo, err := h.Service.CreateTodo(c.Context(), req.Task)
 	if err != nil {
-		return utility.ErrorResponse(c, err)
+		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
 	}
 
-<<<<<<< HEAD
-	return c.Status(fiber.StatusCreated).JSON(utility.StandardResponse{
-		Status: fiber.StatusCreated,
-		Data:   todo,
-	})
-=======
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"status": "success", "data": todo})
->>>>>>> e7302d5a5cff8e6414bb3f1cf9a648c7fa80799d
+	return utility.OkResponse(c.Status(fiber.StatusCreated), todo)
 }
 
 func (h *TodoHandler) UpdateTodoCompletion(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-<<<<<<< HEAD
-		return utility.ErrorResponse(c, err)
-=======
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "error": "Invalid ID"})
->>>>>>> e7302d5a5cff8e6414bb3f1cf9a648c7fa80799d
+		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
 	}
 
 	var req UpdateTodoDto
 	if err := c.BodyParser(&req); err != nil {
-<<<<<<< HEAD
-		return utility.ErrorResponse(c, err)
-=======
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "error": "Invalid request payload"})
->>>>>>> e7302d5a5cff8e6414bb3f1cf9a648c7fa80799d
+		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
 	}
 
 	if err := h.Service.UpdateTodoCompletion(c.Context(), objectID, req.Completed); err != nil {
-		return utility.ErrorResponse(c, err)
+		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
 	}
 
-	return utility.OkResponse(c, nil)
+	return utility.OkResponse(c.Status(fiber.StatusOK), nil)
 }
 
 func (h *TodoHandler) DeleteTodo(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-<<<<<<< HEAD
-		return utility.ErrorResponse(c, err)
-=======
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "error": "Invalid ID"})
->>>>>>> e7302d5a5cff8e6414bb3f1cf9a648c7fa80799d
+		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
 	}
 
 	if err := h.Service.DeleteTodo(c.Context(), objectID); err != nil {
-		return utility.ErrorResponse(c, err)
+		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
 	}
 
-	return utility.OkResponse(c, nil)
+	return utility.OkResponse(c.Status(fiber.StatusNoContent), nil)
 }
