@@ -15,8 +15,7 @@ import (
 )
 
 func main() {
-
-	cfg := config.New()
+	cfg := config.NewConfig()
 
 	// MongoDB bağlantı ayarları
 	clientOptions := options.Client().ApplyURI(cfg.MongoDB.ConnectionURL)
@@ -27,16 +26,16 @@ func main() {
 	defer client.Disconnect(context.Background())
 
 	// Todo Repository, Service ve Handler'larını oluştur
-	todoRepo := todo.NewTodoRepository(client)
+	todoRepo := todo.NewTodoRepository(client, cfg.MongoDB.DatabaseName)
 	todoService := todo.NewTodoService(todoRepo)
 	todoHandler := todo.NewTodoHandler(todoService)
 
 	// User Repository, Service ve Handler'larını oluştur
-	userRepo := user.NewUserRepository(client)
+	userRepo := user.NewUserRepository(client, cfg.MongoDB.DatabaseName)
 	userService := user.NewUserService(userRepo)
 	userHandler := user.NewUserHandler(userService)
 
-	// Fiber
+	// Fiber uygulaması
 	app := fiber.New()
 
 	// Middleware'ler
