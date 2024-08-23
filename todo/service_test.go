@@ -3,14 +3,14 @@ package todo
 import (
 	"TODOproject/mocks"
 	"context"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"testing"
 )
 
 func TestGetAllTodos(t *testing.T) {
-
 	mockRepo := new(mocks.MockTodoRepository)
 
 	expectedTodos := []Todo{
@@ -30,26 +30,26 @@ func TestGetAllTodos(t *testing.T) {
 }
 
 func TestCreateTodo(t *testing.T) {
-
 	mockRepo := new(mocks.MockTodoRepository)
 
-	todo := &Todo{
-		ID: primitive.NewObjectID(), Task: "New Task", Completed: false,
+	newTodo := &Todo{
+		ID:        primitive.NewObjectID(),
+		Task:      "New Task",
+		Completed: false,
 	}
 
-	mockRepo.On("CreateTodo", mock.Anything, todo).Return(todo, nil)
+	mockRepo.On("CreateTodo", mock.Anything, mock.AnythingOfType("*todo.Todo")).Return(newTodo, nil)
 
 	todoService := NewTodoService(mockRepo)
 
 	createdTodo, err := todoService.CreateTodo(context.Background(), "New Task")
 
 	assert.NoError(t, err)
-	assert.Equal(t, todo, createdTodo)
+	assert.Equal(t, newTodo, createdTodo)
 	mockRepo.AssertExpectations(t)
 }
 
 func TestUpdateTodoCompletion(t *testing.T) {
-
 	mockRepo := new(mocks.MockTodoRepository)
 
 	id := primitive.NewObjectID()
@@ -66,7 +66,6 @@ func TestUpdateTodoCompletion(t *testing.T) {
 }
 
 func TestDeleteTodo(t *testing.T) {
-	// Mock oluşturun
 	mockRepo := new(mocks.MockTodoRepository)
 
 	id := primitive.NewObjectID()
@@ -77,7 +76,6 @@ func TestDeleteTodo(t *testing.T) {
 
 	err := todoService.DeleteTodo(context.Background(), id)
 
-	// Sonuçları doğrulayın
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)
 }

@@ -16,8 +16,8 @@ func (m *MockTodoRepository) GetAllTodos(ctx context.Context) ([]todo.Todo, erro
 	return args.Get(0).([]todo.Todo), args.Error(1)
 }
 
-func (m *MockTodoRepository) CreateTodo(ctx context.Context, todo *todo.Todo) (*todo.Todo, error) {
-	args := m.Called(ctx, todo)
+func (m *MockTodoRepository) CreateTodo(ctx context.Context, todo2 *todo.Todo) (*todo.Todo, error) {
+	args := m.Called(ctx, todo2)
 	return args.Get(0).(*todo.Todo), args.Error(1)
 }
 
