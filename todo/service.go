@@ -7,15 +7,16 @@ import (
 )
 
 type TodoService struct {
-	Repo *TodoRepository
+	Repo interface{} // Repo alanı interface{} türünde
 }
 
-func NewTodoService(repo *TodoRepository) *TodoService {
+func NewTodoService(repo TodoRepository) *TodoService {
 	return &TodoService{Repo: repo}
 }
 
 func (s *TodoService) GetAllTodos(ctx context.Context) ([]Todo, error) {
-	return s.Repo.GetAllTodos(ctx)
+	repo := s.Repo.(TodoRepository)
+	return repo.GetAllTodos(ctx)
 }
 
 func (s *TodoService) CreateTodo(ctx context.Context, task string) (*Todo, error) {
@@ -23,13 +24,16 @@ func (s *TodoService) CreateTodo(ctx context.Context, task string) (*Todo, error
 		Task:      task,
 		Completed: false,
 	}
-	return s.Repo.CreateTodo(ctx, todo)
+	repo := s.Repo.(TodoRepository)
+	return repo.CreateTodo(ctx, todo)
 }
 
 func (s *TodoService) UpdateTodoCompletion(ctx context.Context, id primitive.ObjectID, completed bool) error {
-	return s.Repo.UpdateTodoCompletion(ctx, id, completed)
+	repo := s.Repo.(TodoRepository)
+	return repo.UpdateTodoCompletion(ctx, id, completed)
 }
 
 func (s *TodoService) DeleteTodo(ctx context.Context, id primitive.ObjectID) error {
-	return s.Repo.DeleteTodo(ctx, id)
+	repo := s.Repo.(TodoRepository)
+	return repo.DeleteTodo(ctx, id)
 }
