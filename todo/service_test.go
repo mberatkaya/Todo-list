@@ -1,7 +1,6 @@
 package todo
 
 import (
-	"TODOproject/mocks"
 	"context"
 	"testing"
 
@@ -11,7 +10,7 @@ import (
 )
 
 func TestGetAllTodos(t *testing.T) {
-	mockRepo := new(mocks.MockTodoRepository)
+	mockRepo := new(MockTodoRepository)
 
 	expectedTodos := []Todo{
 		{ID: primitive.NewObjectID(), Task: "Test Task 1", Completed: false},
@@ -30,7 +29,7 @@ func TestGetAllTodos(t *testing.T) {
 }
 
 func TestCreateTodo(t *testing.T) {
-	mockRepo := new(mocks.MockTodoRepository)
+	mockRepo := new(MockTodoRepository)
 
 	newTodo := &Todo{
 		ID:        primitive.NewObjectID(),
@@ -50,7 +49,7 @@ func TestCreateTodo(t *testing.T) {
 }
 
 func TestUpdateTodoCompletion(t *testing.T) {
-	mockRepo := new(mocks.MockTodoRepository)
+	mockRepo := new(MockTodoRepository)
 
 	id := primitive.NewObjectID()
 	completed := true
@@ -66,7 +65,7 @@ func TestUpdateTodoCompletion(t *testing.T) {
 }
 
 func TestDeleteTodo(t *testing.T) {
-	mockRepo := new(mocks.MockTodoRepository)
+	mockRepo := new(MockTodoRepository)
 
 	id := primitive.NewObjectID()
 
