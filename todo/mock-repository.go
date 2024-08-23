@@ -1,7 +1,6 @@
-package mocks
+package todo
 
 import (
-	"TODOproject/todo"
 	"context"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,14 +10,14 @@ type MockTodoRepository struct {
 	mock.Mock
 }
 
-func (m *MockTodoRepository) GetAllTodos(ctx context.Context) ([]todo.Todo, error) {
+func (m *MockTodoRepository) GetAllTodos(ctx context.Context) ([]Todo, error) {
 	args := m.Called(ctx)
-	return args.Get(0).([]todo.Todo), args.Error(1)
+	return args.Get(0).([]Todo), args.Error(1)
 }
 
-func (m *MockTodoRepository) CreateTodo(ctx context.Context, todo2 *todo.Todo) (*todo.Todo, error) {
+func (m *MockTodoRepository) CreateTodo(ctx context.Context, todo2 *Todo) (*Todo, error) {
 	args := m.Called(ctx, todo2)
-	return args.Get(0).(*todo.Todo), args.Error(1)
+	return args.Get(0).(*Todo), args.Error(1)
 }
 
 func (m *MockTodoRepository) UpdateTodoCompletion(ctx context.Context, id primitive.ObjectID, completed bool) error {
