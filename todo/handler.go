@@ -38,6 +38,7 @@ func (h *TodoHandler) CreateTodoHandler(c *fiber.Ctx) error {
 	}
 
 	todo, err := h.Service.CreateTodo(c.Context(), req.Task)
+
 	if err != nil {
 		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
 	}

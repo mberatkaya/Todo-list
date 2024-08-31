@@ -1,6 +1,7 @@
 package todo
 
 import (
+	"TODOproject/utility"
 	"bytes"
 	"encoding/json"
 	"github.com/stretchr/testify/mock"
@@ -62,14 +63,19 @@ func TestCreateTodoHandler(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
 
-	var responseData Todo
+	var responseData utility.Response
 	if err := json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, todoID.Hex(), responseData.ID.Hex())
-	assert.Equal(t, todo.Task, responseData.Task)
-	assert.Equal(t, todo.Completed, responseData.Completed)
+	var createTodoAck CreateTodoAck
+	if err := json.Unmarshal(responseData.Data, &createTodoAck); err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, todoID.Hex(), createTodoAck.Id)
+	assert.Equal(t, todo.Task, createTodoAck.Task)
+	assert.Equal(t, todo.Completed, createTodoAck.Completed)
 
 	// Mock servisin beklentilerini kontrol et
 	mockService.AssertExpectations(t)
