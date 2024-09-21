@@ -24,7 +24,7 @@ func (h *TodoHandler) RegisterRoutes(app *fiber.App) {
 }
 
 func (h *TodoHandler) GetAllTodosHandler(c *fiber.Ctx) error {
-	todos, err := h.Service.GetAllTodos(c.Context())
+	todos, err := h.Service.GetAllTodosService(c.Context())
 	if err != nil {
 		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
 	}
@@ -37,7 +37,7 @@ func (h *TodoHandler) CreateTodoHandler(c *fiber.Ctx) error {
 		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
 	}
 
-	todo, err := h.Service.CreateTodo(c.Context(), req.Task)
+	todo, err := h.Service.CreateTodoService(c.Context(), req.Task)
 
 	if err != nil {
 		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
@@ -58,7 +58,7 @@ func (h *TodoHandler) UpdateTodoCompletionHandler(c *fiber.Ctx) error {
 		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
 	}
 
-	if err := h.Service.UpdateTodoCompletion(c.Context(), objectID, req.Completed); err != nil {
+	if err := h.Service.UpdateTodoCompletionService(c.Context(), objectID, req.Completed); err != nil {
 		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
 	}
 
@@ -72,7 +72,7 @@ func (h *TodoHandler) DeleteTodoHandler(c *fiber.Ctx) error {
 		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
 	}
 
-	if err := h.Service.DeleteTodo(c.Context(), objectID); err != nil {
+	if err := h.Service.DeleteTodoService(c.Context(), objectID); err != nil {
 		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
 	}
 
