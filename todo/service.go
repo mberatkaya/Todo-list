@@ -12,19 +12,19 @@ type TodoService interface {
 	DeleteTodo(ctx context.Context, id primitive.ObjectID) error
 }
 
-type todoServiceImpl struct {
+type todoService struct {
 	Repo TodoRepository
 }
 
 func NewTodoService(repo TodoRepository) TodoService {
-	return &todoServiceImpl{Repo: repo}
+	return &todoService{Repo: repo}
 }
 
-func (s *todoServiceImpl) GetAllTodos(ctx context.Context) ([]Todo, error) {
+func (s *todoService) GetAllTodos(ctx context.Context) ([]Todo, error) {
 	return s.Repo.GetAllTodos(ctx)
 }
 
-func (s *todoServiceImpl) CreateTodo(ctx context.Context, task string) (*Todo, error) {
+func (s *todoService) CreateTodo(ctx context.Context, task string) (*Todo, error) {
 	todo := &Todo{
 		Task:      task,
 		Completed: false,
@@ -32,10 +32,10 @@ func (s *todoServiceImpl) CreateTodo(ctx context.Context, task string) (*Todo, e
 	return s.Repo.CreateTodo(ctx, todo)
 }
 
-func (s *todoServiceImpl) UpdateTodoCompletion(ctx context.Context, id primitive.ObjectID, completed bool) error {
+func (s *todoService) UpdateTodoCompletion(ctx context.Context, id primitive.ObjectID, completed bool) error {
 	return s.Repo.UpdateTodoCompletion(ctx, id, completed)
 }
 
-func (s *todoServiceImpl) DeleteTodo(ctx context.Context, id primitive.ObjectID) error {
+func (s *todoService) DeleteTodo(ctx context.Context, id primitive.ObjectID) error {
 	return s.Repo.DeleteTodo(ctx, id)
 }
