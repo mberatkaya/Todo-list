@@ -29,15 +29,17 @@ func TestCreateUser(t *testing.T) {
 			Password: string(hashedPassword),
 		}
 
-		mockRepo.On("GetUserByNickname", mock.Anything, nickname).Return(nil, errors.New("user not found"))
-		mockRepo.On("CreateUser", mock.Anything, mock.AnythingOfType("*user.User")).Return(mockUser, nil)
+		mockRepo.On("GetUserByNickname", mock.Anything, nickname).Return(nil, errors.New("user not found")).Once()
+
+		mockRepo.On("CreateUser", mock.Anything, mock.AnythingOfType("*user.User")).Return(mockUser, nil).Once()
 
 		user, err := service.CreateUser(context.TODO(), nickname, fullName, password)
 
-		assert.NoError(t, err)
-		assert.NotNil(t, user)
-		assert.Equal(t, nickname, user.Nickname)
-		assert.Equal(t, fullName, user.FullName)
+		assert.NoError(t, err, "Error should be nil when user is created successfully")
+		assert.NotNil(t, user, "User should not be nil")
+		assert.Equal(t, nickname, user.Nickname, "Nicknames should match")
+		assert.Equal(t, fullName, user.FullName, "Full names should match")
+
 		mockRepo.AssertExpectations(t)
 	})
 
