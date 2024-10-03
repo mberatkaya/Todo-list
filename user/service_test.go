@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,6 +34,8 @@ func TestCreateUser(t *testing.T) {
 
 		mockRepo.On("CreateUser", mock.Anything, mock.AnythingOfType("*user.User")).Return(mockUser, nil).Once()
 
+		fmt.Printf("%+v\n", mockUser)
+
 		user, err := service.CreateUser(context.TODO(), nickname, fullName, password)
 
 		assert.NoError(t, err, "Error should be nil when user is created successfully")
@@ -44,7 +47,7 @@ func TestCreateUser(t *testing.T) {
 	})
 
 	t.Run("NicknameAlreadyExists", func(t *testing.T) {
-		// Expect GetUserByNickname to return an existing user
+
 		existingUser := &User{Nickname: nickname}
 		mockRepo.On("GetUserByNickname", mock.Anything, nickname).Return(existingUser, nil)
 
@@ -68,7 +71,6 @@ func TestGetUserByID(t *testing.T) {
 		FullName: "Test User",
 	}
 
-	// Expect GetUserByID to return the mockUser
 	mockRepo.On("GetUserByID", mock.Anything, id).Return(mockUser, nil)
 
 	user, err := service.GetUserByID(context.TODO(), id)
@@ -88,10 +90,8 @@ func TestUpdateUser(t *testing.T) {
 	updateFields := bson.D{{"fullName", "Updated User"}}
 	mockUser := &User{ID: id, Nickname: "testuser", FullName: "Old User"}
 
-	// Expect GetUserByID to return the existing user
 	mockRepo.On("GetUserByID", mock.Anything, id).Return(mockUser, nil)
 
-	// Expect UpdateUser to be called successfully
 	mockRepo.On("UpdateUser", mock.Anything, id, updateFields).Return(nil)
 
 	err := service.UpdateUser(context.TODO(), id, updateFields)
@@ -106,7 +106,6 @@ func TestDeleteUser(t *testing.T) {
 
 	id := primitive.NewObjectID()
 
-	// Expect DeleteUser to be called successfully
 	mockRepo.On("DeleteUser", mock.Anything, id).Return(nil)
 
 	err := service.DeleteUser(context.TODO(), id)

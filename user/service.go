@@ -9,15 +9,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct {
+type UserService interface {
+	CreateUser(ctx context.Context, nickname, fullName, password string) (*User, error)
+	GetUserByID(ctx context.Context, id primitive.ObjectID) (*User, error)
+	GetUserByNickname(ctx context.Context, nickname string) (*User, error)
+	UpdateUser(ctx context.Context, id primitive.ObjectID, updateFields bson.D) error
+	DeleteUser(ctx context.Context, id primitive.ObjectID) error
+	ValidatePassword(ctx context.Context, nickname, password string) (*User, error)
+}
+
+type userService struct {
 	Repo UserRepository
 }
 
-func NewUserService(repo UserRepository) *UserService {
-	return &UserService{Repo: repo}
+func NewUserService(repo UserRepository) UserService {
+	return &userService{Repo: repo}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, nickname, fullName, password string) (*User, error) {
+func (s *userService) CreateUser(ctx context.Context, nickname, fullName, password string) (*User, error) {
 	_, err := s.Repo.GetUserByNickname(ctx, nickname)
 	if err == nil {
 		return nil, errors.New("nickname already exists")
@@ -37,15 +46,15 @@ func (s *UserService) CreateUser(ctx context.Context, nickname, fullName, passwo
 	return s.Repo.CreateUser(ctx, user)
 }
 
-func (s *UserService) GetUserByID(ctx context.Context, id primitive.ObjectID) (*User, error) {
+func (s *userService) GetUserByID(ctx context.Context, id primitive.ObjectID) (*User, error) {
 	return s.Repo.GetUserByID(ctx, id)
 }
 
-func (s *UserService) GetUserByNickname(ctx context.Context, nickname string) (*User, error) {
+func (s *userService) GetUserByNickname(ctx context.Context, nickname string) (*User, error) {
 	return s.Repo.GetUserByNickname(ctx, nickname)
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, id primitive.ObjectID, updateFields bson.D) error {
+func (s *userService) UpdateUser(ctx context.Context, id primitive.ObjectID, updateFields bson.D) error {
 	existingUser, err := s.Repo.GetUserByID(ctx, id)
 	if err != nil {
 		return err
@@ -53,7 +62,6 @@ func (s *UserService) UpdateUser(ctx context.Context, id primitive.ObjectID, upd
 
 	for _, field := range updateFields {
 		if field.Key == "nickname" {
-			// Eğer takma ad farklı ise
 			if existingUser.Nickname != field.Value {
 				_, err := s.Repo.GetUserByNickname(ctx, field.Value.(string))
 				if err == nil {
@@ -66,11 +74,11 @@ func (s *UserService) UpdateUser(ctx context.Context, id primitive.ObjectID, upd
 	return s.Repo.UpdateUser(ctx, id, updateFields)
 }
 
-func (s *UserService) DeleteUser(ctx context.Context, id primitive.ObjectID) error {
+func (s *userService) DeleteUser(ctx context.Context, id primitive.ObjectID) error {
 	return s.Repo.DeleteUser(ctx, id)
 }
 
-func (s *UserService) ValidatePassword(ctx context.Context, nickname, password string) (*User, error) {
+func (s *userService) ValidatePassword(ctx context.Context, nickname, password string) (*User, error) {
 	user, err := s.Repo.GetUserByNickname(ctx, nickname)
 	if err != nil {
 		return nil, errors.New("invalid username or password")

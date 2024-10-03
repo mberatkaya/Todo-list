@@ -11,10 +11,10 @@ import (
 )
 
 type UserHandler struct {
-	Service *UserService
+	Service UserService
 }
 
-func NewUserHandler(service *UserService) *UserHandler {
+func NewUserHandler(service UserService) *UserHandler {
 	return &UserHandler{Service: service}
 }
 
@@ -31,30 +31,30 @@ func (h *UserHandler) RegisterRoutes(app *fiber.App) {
 func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	var req CreateUserDto
 	if err := c.BodyParser(&req); err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
+		return utility.ErrorResponse(c, err)
 	}
 
 	user, err := h.Service.CreateUser(c.Context(), req.Nickname, req.FullName, req.Password)
 	if err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
+		return utility.ErrorResponse(c, err)
 	}
 
-	return utility.OkResponse(c.Status(fiber.StatusCreated), user)
+	return utility.OkResponse(c, user)
 }
 
 func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
+		return utility.ErrorResponse(c, err)
 	}
 
 	user, err := h.Service.GetUserByID(c.Context(), objectID)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return utility.ErrorResponse(c.Status(fiber.StatusNotFound), err)
+			return utility.ErrorResponse(c, err)
 		}
-		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
+		return utility.ErrorResponse(c, err)
 	}
 
 	return utility.OkResponse(c, user)
@@ -64,15 +64,14 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
+		return utility.ErrorResponse(c, err)
 	}
 
 	var req UpdateUserDto
 	if err := c.BodyParser(&req); err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
+		return utility.ErrorResponse(c, err)
 	}
 
-	// Update fields
 	updateFields := bson.D{}
 	if req.Nickname != nil {
 		updateFields = append(updateFields, bson.E{"nickname", *req.Nickname})
@@ -83,33 +82,33 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	if req.Password != nil {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*req.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
+			return utility.ErrorResponse(c, err)
 		}
 		updateFields = append(updateFields, bson.E{"password", string(hashedPassword)})
 	}
 
 	if err := h.Service.UpdateUser(c.Context(), objectID, updateFields); err != nil {
 		if err.Error() == "nickname already exists" {
-			return utility.ErrorResponse(c.Status(fiber.StatusConflict), err)
+			return utility.ErrorResponse(c, err)
 		}
-		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
+		return utility.ErrorResponse(c, err)
 	}
 
-	return utility.OkResponse(c.Status(fiber.StatusOK), nil)
+	return utility.OkResponse(c, nil)
 }
 
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
+		return utility.ErrorResponse(c, err)
 	}
 
 	if err := h.Service.DeleteUser(c.Context(), objectID); err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusInternalServerError), err)
+		return utility.ErrorResponse(c, err)
 	}
 
-	return utility.OkResponse(c.Status(fiber.StatusNoContent), nil)
+	return utility.OkResponse(c, nil)
 }
 
 func (h *UserHandler) Login(c *fiber.Ctx) error {
@@ -119,12 +118,12 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	}
 
 	if err := c.BodyParser(&req); err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusBadRequest), err)
+		return utility.ErrorResponse(c, err)
 	}
 
 	user, err := h.Service.ValidatePassword(c.Context(), req.Nickname, req.Password)
 	if err != nil {
-		return utility.ErrorResponse(c.Status(fiber.StatusUnauthorized), err)
+		return utility.ErrorResponse(c, err)
 	}
 
 	return utility.OkResponse(c, user)
