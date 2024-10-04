@@ -23,7 +23,11 @@ func (m *MockUserRepository) GetUserByID(ctx context.Context, id primitive.Objec
 
 func (m *MockUserRepository) GetUserByNickname(ctx context.Context, nickname string) (*User, error) {
 	args := m.Called(ctx, nickname)
-	return args.Get(0).(*User), args.Error(1)
+
+	if user, ok := args.Get(0).(*User); ok && user != nil {
+		return user, args.Error(1)
+	}
+	return nil, args.Error(1)
 }
 
 func (m *MockUserRepository) UpdateUser(ctx context.Context, id primitive.ObjectID, updateFields bson.D) error {
