@@ -3,6 +3,7 @@ This project is a To-Do List application developed using the Go programming lang
 Additionally, the project includes features such as password hashing and test writing, ensuring enhanced security and quality assurance.
 
 Features
+
 Create, delete, update, and mark tasks as complete.
 Password hashing for user authentication (using bcrypt).
 RESTful API endpoints for seamless integration.
@@ -10,6 +11,7 @@ Unit and integration tests to verify application functionality.
 High-performance HTTP request handling with the Fiber framework.
 
 Technologies Used
+
 Go (Golang): A programming language known for its performance and simplicity.
 Fiber (v2): A fast and flexible web framework for handling HTTP requests.
 MongoDB: A NoSQL database for storing task data.
