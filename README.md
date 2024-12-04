@@ -1,4 +1,3 @@
-Project Description
 This project is a To-Do List application developed using the Go programming language, the Fiber web framework, and the MongoDB NoSQL database. The application follows RESTful API principles and provides basic CRUD (Create, Read, Update, Delete) functionality.
 
 Additionally, the project includes features such as password hashing and test writing, ensuring enhanced security and quality assurance.
