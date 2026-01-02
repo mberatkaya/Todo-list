@@ -21,7 +21,7 @@ func TestGetAllTodos(t *testing.T) {
 
 	todoService := NewTodoService(mockRepo)
 
-	todos, err := todoService.GetAllTodos(context.Background())
+	todos, err := todoService.GetAllTodosService(context.Background())
 
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, expectedTodos, todos)
@@ -41,7 +41,7 @@ func TestCreateTodo(t *testing.T) {
 
 	todoService := NewTodoService(mockRepo)
 
-	createdTodo, err := todoService.CreateTodo(context.Background(), "New Task")
+	createdTodo, err := todoService.CreateTodoService(context.Background(), "New Task")
 
 	assert.NoError(t, err)
 	assert.Equal(t, newTodo, createdTodo)
@@ -58,7 +58,7 @@ func TestUpdateTodoCompletion(t *testing.T) {
 
 	todoService := NewTodoService(mockRepo)
 
-	err := todoService.UpdateTodoCompletion(context.Background(), id, completed)
+	err := todoService.UpdateTodoCompletionService(context.Background(), id, completed)
 
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)
@@ -73,7 +73,7 @@ func TestDeleteTodo(t *testing.T) {
 
 	todoService := NewTodoService(mockRepo)
 
-	err := todoService.DeleteTodo(context.Background(), id)
+	err := todoService.DeleteTodoService(context.Background(), id)
 
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)

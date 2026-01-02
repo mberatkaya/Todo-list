@@ -1,13 +1,14 @@
 package utility
 
 import (
+	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 )
 
 type Response struct {
-	Status int         `json:"status"`
-	Data   interface{} `json:"data,omitempty"`
-	Error  string      `json:"error,omitempty"`
+	Status int             `json:"status"`
+	Data   json.RawMessage `json:"data,omitempty"`
+	Error  string          `json:"error,omitempty"`
 }
 
 func ErrorResponse(c *fiber.Ctx, err error) error {
@@ -19,9 +20,10 @@ func ErrorResponse(c *fiber.Ctx, err error) error {
 }
 
 func OkResponse(c *fiber.Ctx, data interface{}) error {
+	dataBytes, _ := json.Marshal(data)
 	response := Response{
 		Status: c.Response().StatusCode(),
-		Data:   data,
+		Data:   dataBytes,
 	}
 	return c.Status(response.Status).JSON(response)
 }
